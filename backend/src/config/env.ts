@@ -3,6 +3,11 @@ import { z } from "zod";
 
 dotenv.config();
 
+console.log({
+  DB_PORT: process.env.DB_PORT,
+  MYSQLPORT: process.env.MYSQLPORT,
+});
+
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive(),
   NODE_ENV: z.enum(["development", "test", "production"]),
@@ -18,7 +23,26 @@ const envSchema = z.object({
   SESSION_DURATION_DAYS: z.coerce.number().int().positive(),
 });
 
-const parsedEnv = envSchema.safeParse(process.env);
+const dbPortValue = (() => {
+  const directDbPort = process.env.DB_PORT?.trim();
+
+  if (directDbPort && Number.isFinite(Number(directDbPort))) {
+    return directDbPort;
+  }
+
+  const railwayMySqlPort = process.env.MYSQLPORT?.trim();
+
+  if (railwayMySqlPort && Number.isFinite(Number(railwayMySqlPort))) {
+    return railwayMySqlPort;
+  }
+
+  return directDbPort ?? railwayMySqlPort;
+})();
+
+const parsedEnv = envSchema.safeParse({
+  ...process.env,
+  DB_PORT: dbPortValue,
+});
 
 if (!parsedEnv.success) {
   const formattedErrors = parsedEnv.error.issues
