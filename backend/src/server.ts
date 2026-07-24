@@ -5,6 +5,13 @@ import { testMySqlConnection } from "@/database/test-connection";
 
 let server: ReturnType<typeof app.listen> | null = null;
 let isShuttingDown = false;
+const STARTUP_RETRY_ATTEMPTS = 5;
+const STARTUP_RETRY_DELAY_MS = 2000;
+
+const wait = async (milliseconds: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
 
 const shutdown = async (signal: string) => {
   if (isShuttingDown) {
@@ -42,18 +49,31 @@ const shutdown = async (signal: string) => {
 };
 
 const startServer = async () => {
-  try {
-    await testMySqlConnection();
+  for (let attempt = 1; attempt <= STARTUP_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      await testMySqlConnection();
 
-    server = app.listen(env.PORT, () => {
-      console.log(`Backend listening on port ${env.PORT}`);
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to start backend.";
-    console.error(message);
-    await closeMySqlPool();
-    process.exit(1);
+      server = app.listen(env.PORT, "0.0.0.0", () => {
+        console.log(`Backend listening on 0.0.0.0:${env.PORT}`);
+      });
+
+      return;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to start backend.";
+
+      console.error(
+        `Startup attempt ${attempt} of ${STARTUP_RETRY_ATTEMPTS} failed: ${message}`,
+      );
+
+      if (attempt < STARTUP_RETRY_ATTEMPTS) {
+        await wait(STARTUP_RETRY_DELAY_MS);
+        continue;
+      }
+
+      await closeMySqlPool();
+      process.exit(1);
+    }
   }
 };
 

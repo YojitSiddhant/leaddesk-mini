@@ -10,8 +10,12 @@ export const testMySqlConnection = async () => {
     connection = await pool.getConnection();
     await connection.query("SELECT 1 AS connection_test");
     console.log("MySQL connection test succeeded.");
-  } catch {
-    throw new Error("Failed to connect to MySQL.");
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown MySQL error.";
+
+    console.error(`MySQL connection test failed: ${message}`);
+    throw new Error(`Failed to connect to MySQL: ${message}`);
   } finally {
     connection?.release();
   }
