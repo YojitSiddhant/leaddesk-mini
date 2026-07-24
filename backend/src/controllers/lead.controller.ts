@@ -1,0 +1,39 @@
+import type { Request, Response } from "express";
+import { ZodError } from "zod";
+
+import { submitLead } from "@/services/lead.service";
+import { createLeadSchema } from "@/validators/lead.validator";
+
+export const createLeadController = async (req: Request, res: Response) => {
+  try {
+    const parsedBody = createLeadSchema.parse(req.body);
+    const leadId = await submitLead(parsedBody);
+
+    return res.status(201).json({
+      success: true,
+      message: "Lead submitted successfully.",
+      data: {
+        id: leadId,
+      },
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        error: {
+          code: "VALIDATION_ERROR",
+          details: error.flatten(),
+        },
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to submit lead.",
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+      },
+    });
+  }
+};
