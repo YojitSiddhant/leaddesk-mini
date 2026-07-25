@@ -16,6 +16,7 @@ const logLeadSubmissionError = (error: unknown) => {
 
 export const createLeadController = async (req: Request, res: Response) => {
   try {
+    console.log("Reached createLead controller");
     const parsedBody = createLeadSchema.parse(req.body);
     const leadId = await submitLead(parsedBody);
 

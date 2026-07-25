@@ -9,6 +9,13 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
+  console.error("Express error handler caught an error");
+  console.error(error);
+
+  if (error instanceof Error && error.stack) {
+    console.error(error.stack);
+  }
+
   if (error instanceof AppError) {
     return res.status(error.statusCode).json({
       success: false,

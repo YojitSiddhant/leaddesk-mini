@@ -5,6 +5,14 @@ import { publicLeadSubmissionRateLimit } from "@/middlewares/rate-limit.middlewa
 
 const leadsRouter = Router();
 
+leadsRouter.use((req, _res, next) => {
+  if (req.method === "POST" && req.path === "/") {
+    console.log("Reached leads router");
+  }
+
+  next();
+});
+
 leadsRouter.post("/", publicLeadSubmissionRateLimit, createLeadController);
 
 export { leadsRouter };

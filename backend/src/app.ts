@@ -1,7 +1,7 @@
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 
 import { env } from "@/config/env";
@@ -17,6 +17,14 @@ export const createApp = () => {
 
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
+
+  app.use((req, _res, next) => {
+    if (req.method === "POST" && req.path === "/api/leads") {
+      console.log("Reached app middleware");
+    }
+
+    next();
+  });
 
   app.use(
     cors({
@@ -34,6 +42,17 @@ export const createApp = () => {
   app.use(express.urlencoded({ extended: true }));
 
   app.use("/api", apiRouter);
+
+  app.use((error: unknown, _req: Request, _res: Response, next: NextFunction) => {
+    console.error("Unhandled Express error");
+    console.error(error);
+
+    if (error instanceof Error && error.stack) {
+      console.error(error.stack);
+    }
+
+    next(error);
+  });
 
   app.use(notFoundHandler);
   app.use(errorHandler);
