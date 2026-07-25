@@ -18,14 +18,6 @@ export const createApp = () => {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
 
-  app.use((req, _res, next) => {
-    if (req.method === "POST" && req.path === "/api/leads") {
-      console.log("Reached app middleware");
-    }
-
-    next();
-  });
-
   app.use(
     cors({
       origin: corsOrigin,
