@@ -1,8 +1,18 @@
 import type { Request, Response } from "express";
 import { ZodError } from "zod";
 
+import { env } from "@/config/env";
 import { submitLead } from "@/services/lead.service";
 import { createLeadSchema } from "@/validators/lead.validator";
+
+const logLeadSubmissionError = (error: unknown) => {
+  console.error("POST /api/leads failed");
+  console.error(error);
+
+  if (error instanceof Error && error.stack) {
+    console.error(error.stack);
+  }
+};
 
 export const createLeadController = async (req: Request, res: Response) => {
   try {
@@ -17,6 +27,8 @@ export const createLeadController = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
+    logLeadSubmissionError(error);
+
     if (error instanceof ZodError) {
       return res.status(400).json({
         success: false,
@@ -30,7 +42,10 @@ export const createLeadController = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       success: false,
-      message: "Failed to submit lead.",
+      message:
+        env.NODE_ENV === "development" && error instanceof Error
+          ? error.message
+          : "Failed to submit lead.",
       error: {
         code: "INTERNAL_SERVER_ERROR",
       },
