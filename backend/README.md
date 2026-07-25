@@ -201,10 +201,13 @@ Suggested production variables:
 
 - `NODE_ENV=production`
 - `PORT` provided by Railway
-- `FRONTEND_URL` set to the deployed frontend URL
+- `FRONTEND_URL=https://leaddesk-mini-frontend-production.up.railway.app`
 - `SESSION_SECRET` set to a long random secret
 - `COOKIE_NAME` set to your preferred session cookie name
 - `SESSION_DURATION_DAYS=7`
+
+In development, CORS allows `http://localhost:3000`. In production, it uses
+`FRONTEND_URL`.
 
 ## Admin lead listing
 
