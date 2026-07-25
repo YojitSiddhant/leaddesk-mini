@@ -1,4 +1,4 @@
-CREATE TABLE admin_sessions (
+CREATE TABLE IF NOT EXISTS admin_sessions (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   session_token VARCHAR(255) NOT NULL,
   admin_user_id BIGINT UNSIGNED NOT NULL,

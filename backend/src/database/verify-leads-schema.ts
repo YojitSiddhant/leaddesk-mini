@@ -95,6 +95,12 @@ export const verifyLeadsTableSchema = async () => {
     console.log("DESCRIBE leads result:");
     console.log(columnRows);
 
+    const [countRows] = await connection.query<RowDataPacket[]>(
+      "SELECT COUNT(*) AS count FROM leads",
+    );
+    console.log("SELECT COUNT(*) FROM leads result:");
+    console.log(countRows);
+
     const columnsByName = new Map(columnRows.map((column) => [column.Field, column]));
     const missingColumns = EXPECTED_COLUMNS.filter(
       (column) => !columnsByName.has(column.name),
