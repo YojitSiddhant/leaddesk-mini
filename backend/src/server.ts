@@ -2,6 +2,7 @@ import { app } from "@/app";
 import { env } from "@/config/env";
 import { closeMySqlPool } from "@/database/mysql";
 import { testMySqlConnection } from "@/database/test-connection";
+import { verifyLeadsTableSchema } from "@/database/verify-leads-schema";
 
 let server: ReturnType<typeof app.listen> | null = null;
 let isShuttingDown = false;
@@ -52,6 +53,7 @@ const startServer = async () => {
   for (let attempt = 1; attempt <= STARTUP_RETRY_ATTEMPTS; attempt += 1) {
     try {
       await testMySqlConnection();
+      await verifyLeadsTableSchema();
 
       server = app.listen(env.PORT, "0.0.0.0", () => {
         console.log(`Backend listening on 0.0.0.0:${env.PORT}`);
